@@ -32,7 +32,8 @@
 %% --------------------------------------------------------------------
 info()->
     [TellstickNode|_]=sd_service:fetch_service("tellstick_service"),
-    rpc:call(TellstickNode,tellstick_service,get_all_info,[]).
+    R=rpc:call(TellstickNode,tellstick_service,get_all_info,[]),
+    {reply,"info_ret",R}.
 %% --------------------------------------------------------------------
 %% Function: 
 %% Description:
