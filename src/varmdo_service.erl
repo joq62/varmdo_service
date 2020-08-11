@@ -24,7 +24,8 @@
 -define(Sender,"service.varmdo@gmail.com").
 %% --------------------------------------------------------------------
 -export([varme/1,
-	 info/1	 
+	 info/1,
+	 execute/1
 	]).
 
 -export([start/0,
@@ -175,7 +176,7 @@ h_beat()->
 	List->
 	    [MailService|_]=List,			 
 	    MailList=rpc:call(MailService,mail_service,get_mail_list,[]),
-	    execute(MailList)
+	    rpc:call(node(),varmdo_service,execute,[MailList])
     end,
     rpc:cast(node(),?MODULE,heart_beat,[]).
 
