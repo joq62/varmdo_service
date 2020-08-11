@@ -52,7 +52,7 @@ t2_test()->
 
     ok.
 t3_test()->
-      Receiver="service.varmdo@gmail.com",
+    Receiver="service.varmdo@gmail.com",
     Sender="service.varmdo@gmail.com",
 
     Subject1="mfa varmdo_service info no",
@@ -61,7 +61,7 @@ t3_test()->
     ?assertMatch({ok,_},mail_service:send_mail(Subject1,Msg1,Receiver,Sender)),
     ?assertEqual(ok,mail_service:disconnect_send()), 
     timer:sleep(12*1000),
-    [{_From,"mfa",[MStr,FStr,Arg]}]=mail_service:get_mail_list(),
+    [{From,"mfa",[MStr,FStr,Arg]}]=mail_service:get_mail_list(),
     L=rpc:call(node(),list_to_atom(MStr),list_to_atom(FStr),[Arg]),
     {device_info,DeviceInfo}=lists:keyfind(device_info,1,L),
     {sensor_info,SensorInfo}=lists:keyfind(sensor_info,1,L),
@@ -69,11 +69,17 @@ t3_test()->
 		     Id/="ej anvand"],
     Sens1=lists:append([Id++"="++Temp++"; "||{Id,Temp}<-SensorInfo],
 		       [Id++"="++Temp++"; "||{Id,Temp,_}<-SensorInfo]),
-    Info=lists:append(Dev1,Sens1),
+   
     Dev2=unicode:characters_to_list(Dev1,unicode),
     Sens2=unicode:characters_to_list(Sens1,unicode),
     io:format("~p~n",[Dev2]),
     io:format("~p~n",[Sens2]),
+    Subject2="result",
+    Msg=unicode:characters_to_list([Dev1,Sens1],unicode),
+    io:format("~p~n",[Msg]),
+    ?assertEqual(ok,mail_service:connect_send()),
+    ?assertMatch({ok,_},mail_service:send_mail(Subject2,Msg,Receiver,Sender)),
+    ?assertEqual(ok,mail_service:disconnect_send()), 
    % ?assertEqual(glurk,R),
     ok.
 
