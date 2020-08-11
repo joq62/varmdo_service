@@ -4,7 +4,7 @@
 [{description, "varmdo_service  " },
 {vsn, "1.0.0" },
 {modules, 
-	  [varmdo_service_app,varmdo_service_sup,varmdo_service]},
+	  [varmdo_service_app,varmdo_service_sup,varmdo_service,varmdo_lib]},
 {registered,[varmdo_service]},
 {applications, [kernel,stdlib]},
 {mod, {varmdo_service_app,[]}},

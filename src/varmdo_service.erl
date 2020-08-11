@@ -20,12 +20,9 @@
 -record(state,{}).
 
 %% Definitions 
-
+-define(HB_interval,10*1000).
+-define(Sender,"service.varmdo@gmail.com").
 %% --------------------------------------------------------------------
-
-
-
-
 -export([varme/1,
 	 info/1	 
 	]).
@@ -33,7 +30,7 @@
 -export([start/0,
 	 stop/0,
 	 ping/0,
-	 heart_beat/1
+	 heart_beat/0
 	]).
 
 %% gen_server callbacks
@@ -66,8 +63,8 @@ info(Args)->
 
 
 %%-----------------------------------------------------------------------
-heart_beat(Interval)->
-    gen_server:cast(?MODULE, {heart_beat,Interval}).
+heart_beat()->
+    gen_server:cast(?MODULE, {heart_beat}).
 
 
 %% ====================================================================
@@ -84,6 +81,7 @@ heart_beat(Interval)->
 %
 %% --------------------------------------------------------------------
 init([]) ->
+    spawn(fun()->h_beat() end),  
     {ok, #state{}}.
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -106,9 +104,8 @@ handle_call({varme,"av"}, _From, State) ->
      Reply={varme,"av"},
     {reply, Reply, State};
 
-handle_call({info,X}, _From, State) ->
-    R=rpc:call('varmdo_1@rpi2',tellstick_service,get_all_info,[]),
-    Reply=R,
+handle_call({info,_}, _From, State) ->
+    Reply=rpc:call(node(),varmdo_lib,info,[]),
     {reply, Reply, State};
 
 
@@ -126,8 +123,8 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({heart_beat,_Interval}, State) ->
-    ok,  
+handle_cast({heart_beat}, State) ->
+    spawn(fun()->h_beat() end),  
     {noreply, State};
 
 handle_cast(Msg, State) ->
@@ -170,9 +167,13 @@ code_change(_OldVsn, State, _Extra) ->
 %% Description:
 %% Returns: non
 %% --------------------------------------------------------------------
-h_beat(Interval)->
-    timer:sleep(Interval),
-    rpc:cast(node(),?MODULE,heart_beat,[Interval]).
+h_beat()->
+    timer:sleep(?HB_interval),
+    [MailService|_]=sd_service:fetch_service("mail_service"),
+    MailList=rpc:call(MailService,mail_service,get_mail_list,[]),
+    execute(MailList),
+    
+    rpc:cast(node(),?MODULE,heart_beat,[]).
 
 %% --------------------------------------------------------------------
 %% Internal functions
@@ -184,3 +185,23 @@ h_beat(Interval)->
 %% Returns: non
 %% --------------------------------------------------------------------
 
+execute([])->
+    ok;
+
+execute([{From,Cmd,[M,F,A]}|T])->
+    [Service|_]=sd_service:fetch_service(M),
+    case rpc:call(Service,list_to_atom(M),list_to_atom(F),[A]) of
+	{reply,Subject,Msg}->
+	    [MailService|_]=sd_service:fetch_service("mail_service"),
+	    ok=rpc:call(MailService,mail_service,connect_send,[]),
+	    {ok,_}=rpc:call(MailService,mail_service,send_mail,[Subject,Msg,From,?Sender]),
+	    ok=rpc:call(MailService,mail_service,disconnect_send,[]),
+	    ok=rpc:call(MailService,mail_service,delete_mail,[From,Cmd,[M,F,A]]);
+	 no_reply->
+	    [MailService|_]=sd_service:fetch_service("mail_service"),
+	    ok=rpc:call(MailService,mail_service,delete_mail,[From,Cmd,[M,F,A]]);
+	Err->
+	    io:format("~p~n",[{?MODULE,?LINE,Err}])
+    end,
+    execute(T).
+    
