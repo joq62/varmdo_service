@@ -169,10 +169,14 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 h_beat()->
     timer:sleep(?HB_interval),
-    [MailService|_]=sd_service:fetch_service("mail_service"),
-    MailList=rpc:call(MailService,mail_service,get_mail_list,[]),
-    execute(MailList),
-    
+    case sd_service:fetch_service("mail_service") of
+	[]->
+	    ok;
+	List->
+	    [MailService|_]=List,			 
+	    MailList=rpc:call(MailService,mail_service,get_mail_list,[]),
+	    execute(MailList)
+    end,
     rpc:cast(node(),?MODULE,heart_beat,[]).
 
 %% --------------------------------------------------------------------
