@@ -46,7 +46,7 @@ info()->
    % io:format("~p~n",[Sens2]),
     Subject="Info",
     Msg=unicode:characters_to_list([Dev1,Sens1],unicode),
-    %  io:format("~p~n",[Msg]),
+    io:format("~p~n",[Msg]),
     {reply,Subject,Msg}.
 %% --------------------------------------------------------------------
 %% Function: 

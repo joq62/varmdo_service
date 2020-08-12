@@ -197,6 +197,7 @@ execute([{From,Cmd,[M,F,A]}|T])->
     [Service|_]=sd_service:fetch_service(M),
     case rpc:call(Service,list_to_atom(M),list_to_atom(F),[A]) of
 	{reply,Subject,Msg}->
+	    io:format("~p~n",[{?MODULE,?LINE,reply,Subject,Msg}]),
 	    [MailService|_]=sd_service:fetch_service("mail_service"),
 	    ok=rpc:call(MailService,mail_service,connect_send,[]),
 	    {ok,_}=rpc:call(MailService,mail_service,send_mail,[Subject,Msg,From,?Sender]),
