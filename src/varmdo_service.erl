@@ -169,6 +169,7 @@ code_change(_OldVsn, State, _Extra) ->
 %% Returns: non
 %% --------------------------------------------------------------------
 h_beat()->
+    io:format("hb_local ~p~n",[{?MODULE,?LINE}]),
     timer:sleep(?HB_interval),
     case sd_service:fetch_service("mail_service") of
 	[]->
