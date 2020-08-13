@@ -17,7 +17,8 @@
 %% External exports
 
 
--export([info/0
+-export([info/0,
+	 varme/1
 	]).
 
 
@@ -54,3 +55,13 @@ info()->
 %% Returns: non
 %% --------------------------------------------------------------------
 %filter_events(Key
+varme("ON")->
+    [TellstickNode|_]=sd_service:fetch_service("tellstick_service"),
+    rpc:call(TellstickNode,tellstick_service,set_device,["element_koket","on"]),
+     rpc:call(TellstickNode,tellstick_service,set_device,["element_vardagsrum","on"]),
+    ok;
+varme("OFF")->
+    [TellstickNode|_]=sd_service:fetch_service("tellstick_service"),
+    rpc:call(TellstickNode,tellstick_service,set_device,["element_koket","off"]),
+     rpc:call(TellstickNode,tellstick_service,set_device,["element_vardagsrum","off"]),
+    ok.

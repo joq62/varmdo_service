@@ -57,8 +57,8 @@ stop()-> gen_server:call(?MODULE, {stop},infinity).
 ping()->
     gen_server:call(?MODULE, {ping},infinity).
 
-varme(Args)->
-    gen_server:call(?MODULE, {varme,Args},infinity).
+varme(Value)->
+    gen_server:call(?MODULE, {varme,Value},infinity).
 info(Args)->
     gen_server:call(?MODULE, {info,Args},infinity).    
 
@@ -98,11 +98,8 @@ handle_call({ping}, _From, State) ->
     Reply={pong,node(),?MODULE},
     {reply, Reply, State};
 
-handle_call({varme,"pa"}, _From, State) ->
-     Reply={varme,"pa"},
-    {reply, Reply, State};
-handle_call({varme,"av"}, _From, State) ->
-     Reply={varme,"av"},
+handle_call({varme,Value}, _From, State) ->
+     Reply=rpc:call(node(),varmdo_lib,info,[varme,Value]),
     {reply, Reply, State};
 
 handle_call({info,_}, _From, State) ->
