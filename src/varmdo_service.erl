@@ -99,7 +99,7 @@ handle_call({ping}, _From, State) ->
     {reply, Reply, State};
 
 handle_call({varme,Value}, _From, State) ->
-     Reply=rpc:call(node(),varmdo_lib,info,[varme,Value]),
+     Reply=rpc:call(node(),varmdo_lib,varme,[Value]),
     {reply, Reply, State};
 
 handle_call({info,_}, _From, State) ->
