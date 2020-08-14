@@ -23,3 +23,13 @@ test:
 	erlc -I include -o  ebin src/*.erl;
 	erlc -I include -o test_ebin test_src/*.erl;
 	erl -pa */ebin -pa ebin -pa test_ebin -s test1 start -sname varmdo_service -setcookie abc
+
+test2:
+	rm -rf include *_service */*~ *.beam ebin/*.beam *~;
+	rm -rf */*~ test_ebin/* test_src/*.beam test_src/*~;
+#	include
+	git clone https://github.com/joq62/include.git;
+	cp src/*.app ebin;
+	erlc -I include -o  ebin src/*.erl;
+	erlc -I include -o test_ebin test_src/*.erl;
+	erl -pa */ebin -pa ebin -pa test_ebin -s test2 start -sname varmdo_service -setcookie abc

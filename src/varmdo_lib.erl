@@ -59,9 +59,9 @@ varme("ON")->
     [TellstickNode|_]=sd_service:fetch_service("tellstick_service"),
     rpc:call(TellstickNode,tellstick_service,set_device,["element_koket","on"]),
      rpc:call(TellstickNode,tellstick_service,set_device,["element_vardagsrum","on"]),
-    ok;
+    no_reply;
 varme("OFF")->
     [TellstickNode|_]=sd_service:fetch_service("tellstick_service"),
     rpc:call(TellstickNode,tellstick_service,set_device,["element_koket","off"]),
      rpc:call(TellstickNode,tellstick_service,set_device,["element_vardagsrum","off"]),
-    ok.
+    no_reply.
