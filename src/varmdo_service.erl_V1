@@ -191,18 +191,19 @@ h_beat()->
 execute([])->
     ok;
 
-execute([{From,SubjectInfo}|T])->
-    case rpc:call(node(),varmdo_lib,run,[SubjectInfo]) of
+execute([{From,Cmd,[M,F,A]}|T])->
+    [Service|_]=sd_service:fetch_service(M),
+    case rpc:call(Service,list_to_atom(M),list_to_atom(F),[A]) of
 	{reply,Subject,Msg}->
 	    io:format("~p~n",[{?MODULE,?LINE,reply,Subject,Msg}]),
 	    [MailService|_]=sd_service:fetch_service("mail_service"),
 	    ok=rpc:call(MailService,mail_service,connect_send,[]),
 	    {ok,_}=rpc:call(MailService,mail_service,send_mail,[Subject,Msg,From,?Sender]),
 	    ok=rpc:call(MailService,mail_service,disconnect_send,[]),
-	    ok=rpc:call(MailService,mail_service,delete_mail,[From,SubjectInfo]);
+	    ok=rpc:call(MailService,mail_service,delete_mail,[From,Cmd,[M,F,A]]);
 	 no_reply->
 	    [MailService|_]=sd_service:fetch_service("mail_service"),
-	    ok=rpc:call(MailService,mail_service,delete_mail,[From,SubjectInfo]);
+	    ok=rpc:call(MailService,mail_service,delete_mail,[From,Cmd,[M,F,A]]);
 	Err->
 	    io:format("~p~n",[{?MODULE,?LINE,Err}])
     end,
